@@ -45,5 +45,11 @@ aws ec2 run-instances \
     --instance-type $INSTANCE_TYPE \
     --key-name $KEY_NAME \
     --iam-instance-profile Name=$INSTANCE_PROFILE_NAME \
-    $([[ -n "$IP_ADDRESS" ]] && echo "--associate-public-ip-address $IP_ADDRESS") \
     --query 'Instances[0].InstanceId'
+
+if [[ -n "$IP_ADDRESS" ]]; then
+    ALLOCATION_ID=$(aws ec2 describe-addresses --query 'Addresses[?PublicIp==`'$IP_ADDRESS'`].AllocationId' --output text)
+    INSTANCE_ID=$(aws ec2 describe-instances --filters Name=instance-state-name,Values=pending,running --query 'Reservations[0].Instances[0].InstanceId' --output text)
+    aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $ALLOCATION_ID
+    ssh-keygen -R $IP_ADDRESS
+fi
