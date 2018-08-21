@@ -16,7 +16,6 @@ SECURITY_GROUP_DESCRIPTION="Security group for $PROJECT_NAME environment"
 KEY_NAME=$PROJECT_SLUG-key
 KEY_FILENAME=$KEY_NAME.pem
 KEY_PATH="$HOME/.ssh/$KEY_FILENAME"
-INSTANCE_PROFILE_NAME=$PROJECT_SLUG-profile
 
 
 aws ec2 create-security-group \
