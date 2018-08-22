@@ -43,7 +43,7 @@ if [[ -n "$SNAPSHOT_ID" ]]; then
     sed -e "s/\${snapshot_id}/snap-0b8890dad4d977a12/" mapping.json > mapping-$SNAPSHOT_ID.json
 fi
 
-echo aws ec2 run-instances \
+aws ec2 run-instances \
     --image-id $IMAGE_ID \
     --subnet-id $SUBNET_ID \
     --security-group-ids $SECURITY_GROUP_ID \
