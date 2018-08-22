@@ -5,11 +5,13 @@ IFS=$'\n\t'
 
 
 
-while getopts ":i:p:" opt; do
+while getopts ":i:p:s:" opt; do
   case $opt in
     i) IP_ADDRESS="$OPTARG"
     ;;
     p) PROJECT_SLUG="$OPTARG"
+    ;;
+    s) SNAPSHOT_ID="$OPTARG"
     ;;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
@@ -37,7 +39,11 @@ KEY_NAME=$PROJECT_SLUG-key
 INSTANCE_PROFILE_NAME=$PROJECT_SLUG-profile
 
 
-aws ec2 run-instances \
+if [[ -n "$SNAPSHOT_ID" ]]; then
+    sed -e "s/\${snapshot_id}/snap-0b8890dad4d977a12/" mapping.json > mapping-$SNAPSHOT_ID.json
+fi
+
+echo aws ec2 run-instances \
     --image-id $IMAGE_ID \
     --subnet-id $SUBNET_ID \
     --security-group-ids $SECURITY_GROUP_ID \
@@ -45,6 +51,7 @@ aws ec2 run-instances \
     --instance-type $INSTANCE_TYPE \
     --key-name $KEY_NAME \
     --iam-instance-profile Name=$INSTANCE_PROFILE_NAME \
+    $([[ -n "$SNAPSHOT_ID" ]] && echo "--block-device-mappings file://mapping-$SNAPSHOT_ID.json") \
     --query 'Instances[0].InstanceId'
 
 if [[ -n "$IP_ADDRESS" ]]; then
